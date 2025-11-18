@@ -1,0 +1,9 @@
+This protocol uses hybrid encryption to establish a secure chat session.
+First, the server generates a 2048-bit RSA key pair if one does not already exist, saving the public and private keys to .pem files. The client is assumed to have trusted access to the server's public key file
+To initiate the session, the client generates a strong 256-bit symmetric AES key. It encrypts this AES key using the server's public key with RSA-OAEP (using SHA-256).
+The client sends this single encrypted AES key to the server over a TCP connection.
+The server receives it and uses its private key to decrypt it.
+This securely establishes a shared secret (the AES key) for the rest of the session.
+For all subsequent chat messages, both client and server use this shared AES key.
+To send a message, the sender (client or server) generates a new 16-byte random nonce, encrypts the plaintext message using AES-CTR mode, and sends the nonce followed by the ciphertext.
+The receiver reads the nonce and ciphertext, then decrypts the message using the same shared AES key and the received nonce, displaying the original message.
