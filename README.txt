@@ -2,23 +2,31 @@
 
 **Description**
 
-Sending secure application messages between a Client and Server using hybrid encryption.
+Running mininet python scripts to simulate a topology with untrusted users
+
+**Requirements**
+- Mininet VM
+- 2 ssh consoles
 
 **Getting Started**
 
 ***Executing program***
+topology.py:
+- create the topology.py file in the VM
+- paste code into the topology.py
 
-To run the server file use:
-    -python server.py will run the server section of the file
-    - Sample format: 'python server.py'
-    -The server will generate a 2048-bit RSA keys
-    -It will then start listening for a client connection.
+l2_learning:
+- from the home directory: cd ~/pox/pox/forwarding
+- nano into l2_learning.py
+- Delete all current code
+- Paste code from pox.py into the l2_learning.py
 
-To run the client file use:
-    -'python client.py'
-    -The client will read the server's public key, generate a symmetric AES key, and send it securely to the server.
-    -It will then prompt the user for messages to send in a secure chat session.
-    -Type `quit` to end the chat.
+Running:
+In a ssh connection, run the pox terminal with the following:
+cd pox./pox.py forwarding.l2_learning
+
+In another ssh connection, create the topology with the following command:
+sudo mn --custom topology.py --topo topology --controller=remote --mac
 
 ## Contributors
 Xindong Lin
