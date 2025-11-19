@@ -24,6 +24,8 @@ from pox.core import core
 import pox.openflow.libopenflow_01 as of
 from pox.lib.util import dpid_to_str, str_to_dpid
 from pox.lib.util import str_to_bool
+from pox.lib.addresses import EthAddr
+
 import time
 
 log = core.getLogger()
@@ -32,47 +34,10 @@ log = core.getLogger()
 # Can be overriden on commandline.
 _flood_delay = 0
 
+h2_mac = EthAddr('d2:13:1c:1b:76:a0')
+h6_mac = EthAddr('b8:94:91:62:f1:65')
+
 class LearningSwitch (object):
-  """
-  The learning switch "brain" associated with a single OpenFlow switch.
-
-  When we see a packet, we'd like to output it on a port which will
-  eventually lead to the destination.  To accomplish this, we build a
-  table that maps addresses to ports.
-
-  We populate the table by observing traffic.  When we see a packet
-  from some source coming from some port, we know that source is out
-  that port.
-
-  When we want to forward traffic, we look up the desintation in our
-  table.  If we don't know the port, we simply send the message out
-  all ports except the one it came in on.  (In the presence of loops,
-  this is bad!).
-
-  In short, our algorithm looks like this:
-
-  For each packet from the switch:
-  1) Use source address and switch port to update address/port table
-  2) Is transparent = False and either Ethertype is LLDP or the packet's
-     destination address is a Bridge Filtered address?
-     Yes:
-        2a) Drop packet -- don't forward link-local traffic (LLDP, 802.1x)
-            DONE
-  3) Is destination multicast?
-     Yes:
-        3a) Flood the packet
-            DONE
-  4) Port for destination address in our address/port table?
-     No:
-        4a) Flood the packet
-            DONE
-  5) Is output port the same as input port?
-     Yes:
-        5a) Drop packet and similar ones for a while
-  6) Install flow table entry in the switch so that this
-     flow goes out the appopriate port
-     6a) Send the packet out appropriate port
-  """
   def __init__ (self, connection, transparent):
     # Switch we'll be adding L2 learning switch capabilities to
     self.connection = connection
@@ -143,6 +108,11 @@ class LearningSwitch (object):
         self.connection.send(msg)
 
     self.macToPort[packet.src] = event.port # 1
+
+    if packet.src == h2_mac and packet.dst == h6_mac:
+        log.info("Dropping traffic from H2")
+        drop()
+        return
 
     if not self.transparent: # 2
       if packet.type == packet.LLDP_TYPE or packet.dst.isBridgeFiltered():
