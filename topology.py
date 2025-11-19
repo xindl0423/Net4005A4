@@ -1,6 +1,7 @@
 from mininet.topo import Topo
 class TestTopo(Topo):
     def __init__(self):
+        Topo.__init__(self)
         #adding pcs
         h1 = self.addHost('h1')
         h2 = self.addHost('h2', mac = 'd2:13:1c:1b:76:a0')
