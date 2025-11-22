@@ -23,7 +23,7 @@ l2_learning:
 
 Running:
 In a ssh connection, run the pox terminal with the following:
-pox/pox.py forwarding.l2_learning
+sudo ~/pox/pox.py forwarding.l2_learning
 
 In another ssh connection, create the topology with the following command:
 sudo mn --custom topology.py --topo Testtopo --controller=remote --mac
